@@ -14,7 +14,7 @@ if(in_array("54",$_SESSION['login_Permisions']))
 				<div class="row">
 					<div class="col-md-12">
 						<div class="card icon-card">
-							<div class="icon-card-header"><div class="icon-card-title"><span><i class="fa fa-key"></i></span><div><h3>Permission Setup</h3><p>Select user, apply a role template, then save.</p></div></div></div>
+							<div class="icon-card-header"><div class="icon-card-title"><span><i class="fa fa-key"></i></span><div><h3>Role Permission Setup</h3><p>Select a role, apply a template, then save module rights.</p></div></div><a class="icon-btn icon-btn-soft" href="index.php?page=Modules/user-roles"><i class="fa fa-users-cog"></i> User Roles</a></div>
 							<div class="card-body icon-card-body">
 								<div class="row">
 									<?php
@@ -22,7 +22,7 @@ if(in_array("54",$_SESSION['login_Permisions']))
 									$ref="";
 									if(isset($_GET['ref'])){
 										$ref = icon_get_int('ref');
-										$queryPer = "SELECT * FROM module_permision WHERE user_id = ".$ref;
+										$queryPer = "SELECT mod_id FROM role_permissions WHERE role_id = ".$ref;
 										$resultPer = mysqli_query($conn,$queryPer);
 										while($dataPer = mysqli_fetch_array($resultPer)){
 											$modUserPer .= $dataPer['mod_id'].',';
@@ -31,19 +31,19 @@ if(in_array("54",$_SESSION['login_Permisions']))
 									}
 									?>
 									<div class="col-md-10">
-										<label><b>Select User:</b></label>
-										<select name="user_id" class="form-control" id="user_id" required="true">
+										<label><b>Select Role:</b></label>
+										<select name="role_id" class="form-control" id="role_id" required="true">
 											<option value="">Please Select</option>
 											<?php 
-											$query = "SELECT * FROM users";
+											$query = "SELECT * FROM roles WHERE status = 0 ORDER BY role_name ASC";
 											$result = mysqli_query($conn,$query);
 											while($data = mysqli_fetch_array($result)){
 												$selectedVal="";
-												if($ref == $data['id']){
+												if($ref == $data['role_id']){
 													$selectedVal = "selected";
 												}
 												?>
-												<option <?php echo $selectedVal ?> value="<?= $data['id'] ?>"><?= $data['name'] ?></option>
+												<option <?php echo $selectedVal ?> value="<?= $data['role_id'] ?>"><?= $data['role_name'] ?></option>
 												<?php
 											}
 											?>
@@ -168,8 +168,8 @@ if(in_array("54",$_SESSION['login_Permisions']))
 
 		<script>
 			$('#filterBtn').click(function(){
-				var user = $('#user_id').val();
-				location.replace('index.php?page=Modules/permissions&ref='+user)
+				var role = $('#role_id').val();
+				location.replace('index.php?page=Modules/permissions&ref='+role)
 			});
 			const roleTemplates = {
 				admin: 'all',
@@ -197,7 +197,7 @@ if(in_array("54",$_SESSION['login_Permisions']))
 				e.preventDefault()
 				start_load()
 				$.ajax({
-					url:'ajax.php?action=save_module_permissions',
+					url:'ajax.php?action=save_role_permissions',
 					data: new FormData($(this)[0]),
 					cache: false,
 					contentType: false,

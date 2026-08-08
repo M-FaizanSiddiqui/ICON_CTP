@@ -1,7 +1,9 @@
 <?php
 include 'functions.php';
 include_once 'secure_session.php';
-ini_set('display_errors', 1);
+if(icon_config('app_debug', false)){
+	ini_set('display_errors', 1);
+}
 Class Action {
 	private $db;
 
@@ -51,13 +53,13 @@ Class Action {
 			}
 
 			$usr_mod_permisions=array("0");
-			$qry_permisions = $this->db->query("SELECT * FROM module_permision where user_id = ".$_SESSION['login_id']);
+			$qry_permisions = $this->db->query("SELECT mod_id FROM module_permision where user_id = ".$_SESSION['login_id']." UNION SELECT rp.mod_id FROM user_roles ur INNER JOIN role_permissions rp ON ur.role_id = rp.role_id INNER JOIN roles r ON ur.role_id = r.role_id WHERE ur.user_id = ".$_SESSION['login_id']." AND r.status = 0");
 			if($qry_permisions->num_rows > 0){
 				while($row=$qry_permisions->fetch_assoc()){
 					array_push($usr_mod_permisions,$row['mod_id']);
 				}				
 			}
-			$_SESSION['login_Permisions'] = $usr_mod_permisions;
+			$_SESSION['login_Permisions'] = array_values(array_unique(array_map('strval',$usr_mod_permisions)));
 
 			$act_log = activityLog("User Logged In, User: ".$_SESSION['login_name']." ",$_SESSION['login_id'],$this->db);
 
@@ -1346,6 +1348,70 @@ Class Action {
 			mysqli_query($this->db,"ROLLBACK");
 			return "Error Occured!";
 		}
+	}
+
+	function save_role_permissions(){
+		mysqli_query($this->db,"START TRANSACTION");
+		$role_id = isset($_POST['role_id']) ? (int)$_POST['role_id'] : 0;
+		if($role_id <= 0){
+			mysqli_query($this->db,"ROLLBACK");
+			return "Invalid role selected.";
+		}
+		$q1 = mysqli_query($this->db,"DELETE FROM role_permissions WHERE role_id = ".$role_id);
+		$q2_status = "";
+		if(isset($_POST['permission']) && is_array($_POST['permission'])){
+			$stmt = $this->db->prepare("INSERT INTO role_permissions (role_id, mod_id) VALUES (?, ?)");
+			foreach($_POST['permission'] as $module_key => $permission_values){
+				$module_id = (int)$module_key;
+				if($module_id <= 0 || !is_array($permission_values) || !isset($permission_values[0]) || $permission_values[0] !== 'on'){
+					continue;
+				}
+				$stmt->bind_param("ii",$role_id,$module_id);
+				if(!$stmt->execute()){
+					$q2_status = "failed";
+					break;
+				}
+			}
+			$stmt->close();
+		}
+		$act_log = activityLog("Role permissions updated. Role Id: ".$role_id.".",$_SESSION['login_id'],$this->db);
+		if($q1 && $q2_status != 'failed' && $act_log){
+			mysqli_query($this->db,"COMMIT");
+			return 1;
+		}
+		mysqli_query($this->db,"ROLLBACK");
+		return "Error Occured!";
+	}
+
+	function save_user_roles(){
+		mysqli_query($this->db,"START TRANSACTION");
+		$user_id = isset($_POST['user_id']) ? (int)$_POST['user_id'] : 0;
+		if($user_id <= 0){
+			mysqli_query($this->db,"ROLLBACK");
+			return "Invalid user selected.";
+		}
+		$q1 = mysqli_query($this->db,"DELETE FROM user_roles WHERE user_id = ".$user_id);
+		$q2_status = "";
+		if(isset($_POST['roles']) && is_array($_POST['roles'])){
+			$stmt = $this->db->prepare("INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)");
+			foreach($_POST['roles'] as $role_id){
+				$role_id = (int)$role_id;
+				if($role_id <= 0){ continue; }
+				$stmt->bind_param("ii",$user_id,$role_id);
+				if(!$stmt->execute()){
+					$q2_status = "failed";
+					break;
+				}
+			}
+			$stmt->close();
+		}
+		$act_log = activityLog("User roles updated. User Id: ".$user_id.".",$_SESSION['login_id'],$this->db);
+		if($q1 && $q2_status != 'failed' && $act_log){
+			mysqli_query($this->db,"COMMIT");
+			return 1;
+		}
+		mysqli_query($this->db,"ROLLBACK");
+		return "Error Occured!";
 	}
 
 
