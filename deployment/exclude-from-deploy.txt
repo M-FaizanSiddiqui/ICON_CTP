@@ -1,0 +1,15 @@
+_archive_old_files/
+database/audit/
+.git/
+.agents/
+.codex/
+*.zip
+*.rar
+*.7z
+*.bak
+*.old
+*.tmp
+test.php
+test-*.php
+sasasasasas.php
+codex-clipboard-*.png
