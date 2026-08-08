@@ -383,8 +383,9 @@ Class Action {
 		mysqli_query($this->db,"START TRANSACTION");
 		foreach($_POST as $k => $v){
 			if(!in_array($k, array('id')) && !is_numeric($k)){
+				$v = mysqli_real_escape_string($this->db,(string)$v);
 				if(empty($data)){
-					$data .= " $k='$v' ";
+					$data .= " $k='$v' ";					
 				}else{
 					$data .= ", $k='$v' ";
 				}
@@ -620,6 +621,7 @@ Class Action {
 		mysqli_query($this->db,"START TRANSACTION");
 		foreach($_POST as $k => $v){
 			if(!in_array($k, array('id')) && !is_numeric($k)){
+				$v = mysqli_real_escape_string($this->db,(string)$v);
 
 				$is_empty = false;
 				if(empty($data)){
@@ -683,13 +685,16 @@ Class Action {
 				$save = $this->db->query("UPDATE customer_payment set $data where pay_id = $pay_id");
 			}
 
-			$table_id = $this->db->insert_id;
+			$table_id = empty($id) ? $this->db->insert_id : (int)$pay_id;
 
 			$act_log = activityLog("Customer Payment has been made. Details are (".$data_act."). ",$_SESSION['login_id'],$this->db);		
 
-			$target_account = $customer_id;
-			$sec_acc = $receive_in_acc;
-			$make_voucher = generate_voucher(4,$target_account,$sec_acc,$payment_date,$amount,'customer_payment',$table_id,$remarks,$_SESSION['login_id'],$this->db);
+			$target_account = (int)$customer_id;
+			$sec_acc = (int)$receive_in_acc;
+			$amount = (float)$amount;
+			$payment_date = preg_match('/^\d{4}-\d{2}-\d{2}$/', (string)$payment_date) ? $payment_date : date('Y-m-d');
+			$remarks = mysqli_real_escape_string($this->db,(string)$remarks);
+			$make_voucher = ($target_account > 0 && $sec_acc > 0 && $amount > 0) ? generate_voucher(4,$target_account,$sec_acc,$payment_date,$amount,'customer_payment',$table_id,$remarks,$_SESSION['login_id'],$this->db) : false;
 
 			if($save && $act_log && $make_voucher)
 			{
@@ -1063,16 +1068,20 @@ Class Action {
 			$save_Date = "INSERT INTO supplier_payment set $data";
 			$save = $this->db->query($save_Date);
 		}else{
+			$pay_id = (int)$pay_id;
 			$save = $this->db->query("UPDATE supplier_payment set $data where pay_id = $pay_id");
 		}
 
-		$table_id = $this->db->insert_id;
+		$table_id = empty($id) ? $this->db->insert_id : (int)$pay_id;
 
 		$act_log = activityLog("Supplier Payment has been made. Details are (".$data_act."). ",$_SESSION['login_id'],$this->db);		
 
-		$target_account = $supplier_id;
-		$sec_acc = $paid_from_acc;
-		$make_voucher = generate_voucher(2,$target_account,$sec_acc,$payment_date,$amount,'supplier_payment',$table_id,$remarks,$_SESSION['login_id'],$this->db);
+		$target_account = (int)$supplier_id;
+		$sec_acc = (int)$paid_from_acc;
+		$amount = (float)$amount;
+		$payment_date = preg_match('/^\d{4}-\d{2}-\d{2}$/', (string)$payment_date) ? $payment_date : date('Y-m-d');
+		$remarks = mysqli_real_escape_string($this->db,(string)$remarks);
+		$make_voucher = ($target_account > 0 && $sec_acc > 0 && $amount > 0) ? generate_voucher(2,$target_account,$sec_acc,$payment_date,$amount,'supplier_payment',$table_id,$remarks,$_SESSION['login_id'],$this->db) : false;
 
 		if($save && $act_log && $make_voucher)
 		{
@@ -1299,10 +1308,13 @@ Class Action {
 	
 	
 	function save_module_permissions(){
-		extract($_POST);
 		mysqli_query($this->db,"START TRANSACTION");
 
-		$user_id = mysqli_real_escape_string($this->db,$_POST['user_id']);
+		$user_id = isset($_POST['user_id']) ? (int)$_POST['user_id'] : 0;
+		if($user_id <= 0){
+			mysqli_query($this->db,"ROLLBACK");
+			return "Invalid user selected.";
+		}
 		$data_act = "";
 
 		$del = "DELETE from module_permision WHERE user_id =".$user_id;
@@ -1311,20 +1323,20 @@ Class Action {
 
 		// print_r($_POST['permission']);
 
-		$qq="";
-		for($i=0; $i<count($_POST['module_id']); $i++){
-			
-			if(isset($_POST['permission'][$i][0])){
-				$permission = mysqli_real_escape_string($this->db,$_POST['permission'][$i][0]);
-				if($permission == 'on'){
-					$module_id = mysqli_real_escape_string($this->db,$_POST['module_id'][$i][0]);
-					$queryAdd = "INSERT INTO module_permision set mod_id = ".$module_id.", user_id = ".$user_id;
-					$q2 = mysqli_query($this->db,$queryAdd);
-					if(!$q2){
-						$q2_status = "failed";
-					}
+		if(isset($_POST['permission']) && is_array($_POST['permission'])){
+			$stmt = $this->db->prepare("INSERT INTO module_permision (mod_id, user_id) VALUES (?, ?)");
+			foreach($_POST['permission'] as $module_key => $permission_values){
+				$module_id = (int)$module_key;
+				if($module_id <= 0 || !is_array($permission_values) || !isset($permission_values[0]) || $permission_values[0] !== 'on'){
+					continue;
+				}
+				$stmt->bind_param("ii",$module_id,$user_id);
+				if(!$stmt->execute()){
+					$q2_status = "failed";
+					break;
 				}
 			}
+			$stmt->close();
 		}
 		if($q1 && $q2_status != 'failed')
 		{
