@@ -12,7 +12,7 @@ if(!function_exists('sidebar_module_icon')){
       34 => 'fas fa-calculator', 35 => 'fas fa-sitemap', 36 => 'fas fa-project-diagram', 37 => 'fas fa-folder-plus', 38 => 'fas fa-plus-circle', 77 => 'fas fa-balance-scale',
       39 => 'fas fa-user-shield',
       42 => 'fas fa-chart-bar', 43 => 'fas fa-chart-line', 44 => 'fas fa-money-check', 45 => 'fas fa-file-invoice-dollar', 46 => 'fas fa-hand-holding-usd', 48 => 'fas fa-file-invoice', 74 => 'fas fa-shopping-cart',
-      51 => 'fas fa-puzzle-piece', 52 => 'fas fa-plus-square', 53 => 'fas fa-th-large', 54 => 'fas fa-user-lock',
+      51 => 'fas fa-puzzle-piece', 52 => 'fas fa-plus-square', 53 => 'fas fa-th-large', 54 => 'fas fa-user-lock', 801 => 'fas fa-history', 803 => 'fas fa-users-cog', 804 => 'fas fa-users',
       59 => 'fas fa-user-tie', 60 => 'fas fa-id-card', 61 => 'fas fa-user-plus', 62 => 'fas fa-calendar-check', 65 => 'fas fa-calendar-alt', 69 => 'fas fa-clipboard-list', 78 => 'fas fa-user-graduate', 70 => 'fas fa-file-invoice-dollar', 71 => 'fas fa-money-check-alt', 75 => 'fas fa-moon', 76 => 'fas fa-business-time',
       66 => 'fas fa-wallet', 67 => 'fas fa-file-invoice', 68 => 'fas fa-file-medical', 73 => 'fas fa-book'
     );
@@ -59,7 +59,19 @@ if(!function_exists('sidebar_module_icon')){
       <ul class="list-unstyled components">
 
         <?php
-        $q = "SELECT * FROM modules_1 as a INNER JOIN module_permision as b on a.m_id = b.mod_id where a.m_parent_id = 0 and b.user_id = ".$_SESSION['login_id']." AND show_in_menu = 1 order by ordering ASC";
+        if(isset($_SESSION['login_id'])){
+          $fresh_permissions = array("0");
+          $login_id_sidebar = (int)$_SESSION['login_id'];
+          $perm_refresh = $conn->query("SELECT mod_id FROM module_permision WHERE user_id = ".$login_id_sidebar." UNION SELECT rp.mod_id FROM user_roles ur INNER JOIN role_permissions rp ON ur.role_id = rp.role_id INNER JOIN roles r ON ur.role_id = r.role_id WHERE ur.user_id = ".$login_id_sidebar." AND r.status = 0");
+          while($perm_refresh && $perm_row = $perm_refresh->fetch_assoc()){
+            $fresh_permissions[] = (string)$perm_row['mod_id'];
+          }
+          $_SESSION['login_Permisions'] = array_values(array_unique($fresh_permissions));
+        }
+        $permission_ids = isset($_SESSION['login_Permisions']) && is_array($_SESSION['login_Permisions']) ? array_map('intval', $_SESSION['login_Permisions']) : array(0);
+        $permission_ids = array_values(array_unique($permission_ids));
+        $permission_sql = count($permission_ids) > 0 ? implode(',', $permission_ids) : '0';
+        $q = "SELECT * FROM modules_1 where m_parent_id = 0 and m_id IN (".$permission_sql.") AND show_in_menu = 1 order by ordering ASC";
         $query_modules = $conn->query($q);
         while($row=$query_modules->fetch_assoc())
         {
@@ -89,7 +101,7 @@ if(!function_exists('sidebar_module_icon')){
 
            <ul class="collapse list-unstyled" id="<?php echo $m_name ?>">
             <?php
-            $query_modules_sub = $conn->query("SELECT * FROM modules_1 as a INNER JOIN module_permision as b on a.m_id = b.mod_id where b.user_id = ".$_SESSION['login_id']." AND m_parent_id = ".$m_id." AND show_in_menu = 1 order by ordering ASC");
+            $query_modules_sub = $conn->query("SELECT * FROM modules_1 where m_id IN (".$permission_sql.") AND m_parent_id = ".$m_id." AND show_in_menu = 1 order by ordering ASC");
             while($row=$query_modules_sub->fetch_assoc()){
 
               $m_id_sub = $row['m_id'];
