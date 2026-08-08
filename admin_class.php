@@ -1414,6 +1414,47 @@ Class Action {
 		return "Error Occured!";
 	}
 
+	function save_policy(){
+		$policy_id = isset($_POST['policy_id']) ? (int)$_POST['policy_id'] : 0;
+		$policy_name = trim((string)($_POST['policy_name'] ?? ''));
+		$policy_key = strtoupper(trim((string)($_POST['policy_key'] ?? '')));
+		$policy_value = trim((string)($_POST['policy_value'] ?? ''));
+		if($policy_name === '' || $policy_key === '' || $policy_value === ''){
+			return "Policy name, key and value are required.";
+		}
+		if(strlen($policy_key) > 20 || !preg_match('/^[A-Z0-9_]+$/', $policy_key)){
+			return "Policy key should use only letters, numbers or underscore.";
+		}
+		if(strlen($policy_value) > 20){
+			return "Policy value is too long.";
+		}
+		if($policy_id > 0){
+			$stmt = $this->db->prepare("UPDATE policies SET policy_name=?, policy_key=?, policy_value=? WHERE policy_id=?");
+			$stmt->bind_param("sssi",$policy_name,$policy_key,$policy_value,$policy_id);
+			$save = $stmt->execute();
+			$stmt->close();
+			$table_id = $policy_id;
+		}else{
+			$stmt = $this->db->prepare("INSERT INTO policies (policy_name,policy_key,policy_value) VALUES (?,?,?)");
+			$stmt->bind_param("sss",$policy_name,$policy_key,$policy_value);
+			$save = $stmt->execute();
+			$table_id = $this->db->insert_id;
+			$stmt->close();
+		}
+		$act_log = activityLog("Policy saved. Policy Id: ".$table_id.", Key: ".$policy_key.".",$_SESSION['login_id'],$this->db);
+		return ($save && $act_log) ? 1 : "Error Occured!";
+	}
+
+	function delete_policy(){
+		$policy_id = isset($_POST['policy_id']) ? (int)$_POST['policy_id'] : 0;
+		if($policy_id <= 0){
+			return "Invalid policy.";
+		}
+		$delete = $this->db->query("DELETE FROM policies WHERE policy_id = ".$policy_id);
+		$act_log = activityLog("Policy deleted. Policy Id: ".$policy_id.".",$_SESSION['login_id'],$this->db);
+		return ($delete && $act_log) ? 1 : "Error Occured!";
+	}
+
 
 
 

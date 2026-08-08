@@ -11,7 +11,7 @@ $allowed_actions = array(
 	'edit_jobcard','save_customer_payment','delete_customer_payment','save_acc_type','delete_acc_type',
 	'save_new_acc','save_receive_inventory_cust','save_supplier_payment','save_transfer_inventory',
 	'save_waste_item','save_module','save_module_permissions','save_employee','sync_attendance',
-	'process_salary','save_journal_voucher','save_role_permissions','save_user_roles'
+	'process_salary','save_journal_voucher','save_role_permissions','save_user_roles','save_policy','delete_policy'
 );
 if($action === '' || !in_array($action, $allowed_actions, true)){
 	http_response_code(400);
@@ -248,6 +248,16 @@ if($action == "save_user_roles"){
 	$save = $crud->save_user_roles();
 	if($save)
 		echo $save;
+}
+if($action == "save_policy"){
+	$save = $crud->save_policy();
+	if($save)
+		echo $save;
+}
+if($action == "delete_policy"){
+	$delete = $crud->delete_policy();
+	if($delete)
+		echo $delete;
 }
 
 
