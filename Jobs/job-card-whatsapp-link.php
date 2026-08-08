@@ -4,8 +4,12 @@ header('Content-Type: application/json');
 
 include('../db_connect.php');
 
-define('ORDER_TRACKING_SECRET', 'ICON-CTP-ORDER-TRACKING-2026-PRIVATE-KEY');
-define('ORDER_TRACKING_PUBLIC_BASE_URL', 'https://icon.net.pk');
+if(!defined('ORDER_TRACKING_SECRET')){
+	define('ORDER_TRACKING_SECRET', icon_config('order_tracking.secret', ''));
+}
+if(!defined('ORDER_TRACKING_PUBLIC_BASE_URL')){
+	define('ORDER_TRACKING_PUBLIC_BASE_URL', icon_config('order_tracking.public_base_url', ''));
+}
 
 function jobcard_whatsapp_response($status, $message, $url = '')
 {
@@ -47,6 +51,10 @@ function jobcard_tracking_ref($job_id)
 
 if (!isset($_SESSION['login_id'])) {
 	jobcard_whatsapp_response('error', 'Session expired. Please login again.');
+}
+
+if (ORDER_TRACKING_SECRET === '' || ORDER_TRACKING_PUBLIC_BASE_URL === '') {
+	jobcard_whatsapp_response('error', 'Order tracking is not configured. Please update config/app.php.');
 }
 
 if (isset($_SESSION['login_Permisions']) && !in_array('41', $_SESSION['login_Permisions'])) {

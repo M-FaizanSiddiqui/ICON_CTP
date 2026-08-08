@@ -1,9 +1,16 @@
 <?php
 include('db_connect.php');
 
-define('ORDER_TRACKING_SECRET', 'ICON-CTP-ORDER-TRACKING-2026-PRIVATE-KEY');
+if(!defined('ORDER_TRACKING_SECRET')){
+	define('ORDER_TRACKING_SECRET', icon_config('order_tracking.secret', ''));
+}
 
 $ref = isset($_GET['ref']) ? trim((string)$_GET['ref']) : '';
+if(ORDER_TRACKING_SECRET === ''){
+	http_response_code(500);
+	echo 'Order tracking is not configured.';
+	exit;
+}
 $trackingTableSql = "CREATE TABLE IF NOT EXISTS job_order_status_history (
 	id INT AUTO_INCREMENT PRIMARY KEY,
 	job_id INT NOT NULL,

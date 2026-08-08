@@ -2,6 +2,7 @@
 /.codex/
 /_archive_old_files/
 /database/audit/
+/config/app.php
 
 *.zip
 *.rar
