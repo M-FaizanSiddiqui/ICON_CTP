@@ -6,8 +6,12 @@ SELECT 'Activity Log','SystemUser/activity-log',51,'fa fa-history',99,0,1
 WHERE NOT EXISTS (SELECT 1 FROM modules_1 WHERE m_url='SystemUser/activity-log');
 
 INSERT INTO modules_1 (m_name,m_url,m_parent_id,fav_icon,ordering,heading,show_in_menu)
-SELECT 'Report Center','Reports/report-center',42,'fa fa-chart-pie',1,0,1
+SELECT 'Report Center','Reports/report-center',0,'fa fa-chart-pie',13,0,1
 WHERE NOT EXISTS (SELECT 1 FROM modules_1 WHERE m_url='Reports/report-center');
+
+UPDATE modules_1
+SET m_parent_id=0, ordering=13, heading=0, show_in_menu=1, fav_icon='fa fa-chart-pie'
+WHERE m_url='Reports/report-center';
 
 INSERT INTO module_permision (mod_id,user_id)
 SELECT m.m_id,1

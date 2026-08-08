@@ -13,15 +13,19 @@ INSERT INTO modules_1 (m_name, m_url, m_parent_id, fav_icon, ordering, heading, 
 SELECT 'Policies', 'SystemUser/policies', 39, 'fa fa-clipboard', 5, 0, 1
 WHERE NOT EXISTS (SELECT 1 FROM modules_1 WHERE m_url = 'SystemUser/policies');
 
+UPDATE modules_1
+SET m_name = 'Business Summary', m_url = 'Business/weekly-summary', m_parent_id = 0, fav_icon = 'fab fa-whatsapp', ordering = 12, heading = 0, show_in_menu = 1
+WHERE m_url = 'Reports/weekly-summary';
+
 INSERT INTO modules_1 (m_name, m_url, m_parent_id, fav_icon, ordering, heading, show_in_menu)
-SELECT 'Weekly Summary', 'Reports/weekly-summary', 42, 'fab fa-whatsapp', 9, 0, 1
-WHERE NOT EXISTS (SELECT 1 FROM modules_1 WHERE m_url = 'Reports/weekly-summary');
+SELECT 'Business Summary', 'Business/weekly-summary', 0, 'fab fa-whatsapp', 12, 0, 1
+WHERE NOT EXISTS (SELECT 1 FROM modules_1 WHERE m_url = 'Business/weekly-summary');
 
 -- Admin role can access all new screens.
 INSERT INTO role_permissions (role_id, mod_id)
 SELECT r.role_id, m.m_id
 FROM roles r
-JOIN modules_1 m ON m.m_url IN ('SystemUser/data-health','SystemUser/error-logs','SystemUser/policies','Reports/weekly-summary')
+JOIN modules_1 m ON m.m_url IN ('SystemUser/data-health','SystemUser/error-logs','SystemUser/policies','Business/weekly-summary')
 WHERE r.role_slug = 'admin'
 AND NOT EXISTS (
 	SELECT 1 FROM role_permissions rp WHERE rp.role_id = r.role_id AND rp.mod_id = m.m_id
@@ -31,7 +35,7 @@ AND NOT EXISTS (
 INSERT INTO role_permissions (role_id, mod_id)
 SELECT r.role_id, m.m_id
 FROM roles r
-JOIN modules_1 m ON m.m_url = 'Reports/weekly-summary'
+JOIN modules_1 m ON m.m_url = 'Business/weekly-summary'
 WHERE r.role_slug = 'accounts'
 AND NOT EXISTS (
 	SELECT 1 FROM role_permissions rp WHERE rp.role_id = r.role_id AND rp.mod_id = m.m_id
@@ -41,7 +45,7 @@ AND NOT EXISTS (
 INSERT INTO module_permision (mod_id, user_id)
 SELECT m.m_id, 1
 FROM modules_1 m
-WHERE m.m_url IN ('SystemUser/data-health','SystemUser/error-logs','SystemUser/policies','Reports/weekly-summary')
+WHERE m.m_url IN ('SystemUser/data-health','SystemUser/error-logs','SystemUser/policies','Business/weekly-summary')
 AND NOT EXISTS (
 	SELECT 1 FROM module_permision mp WHERE mp.mod_id = m.m_id AND mp.user_id = 1
 );
