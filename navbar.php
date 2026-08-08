@@ -95,11 +95,12 @@ if(!function_exists('sidebar_module_icon')){
         }
 
         else{
+          $collapse_id = 'module-collapse-'.$m_id;
           ?>
           <li>
-           <a href="#<?php echo $m_name ?>" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle nav-<?php echo $m_id ?>"><span class='icon-field'><i class="<?php echo $fav_icon ?> mr-3"></i></span> <?php echo $m_name ?></a>
+           <a href="#<?php echo $collapse_id ?>" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle nav-<?php echo $m_id ?>"><span class='icon-field'><i class="<?php echo $fav_icon ?> mr-3"></i></span> <?php echo $m_name ?></a>
 
-           <ul class="collapse list-unstyled" id="<?php echo $m_name ?>">
+           <ul class="collapse list-unstyled" id="<?php echo $collapse_id ?>">
             <?php
             $query_modules_sub = $conn->query("SELECT * FROM modules_1 where m_id IN (".$permission_sql.") AND m_parent_id = ".$m_id." AND show_in_menu = 1 order by ordering ASC");
             while($row=$query_modules_sub->fetch_assoc()){
