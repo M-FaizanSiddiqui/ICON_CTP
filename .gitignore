@@ -3,7 +3,7 @@
 /_archive_old_files/
 /database/audit/
 /config/app.php
-/storage/logs/
+/storage/
 
 *.zip
 *.rar

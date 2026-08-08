@@ -1,4 +1,4 @@
-<?php session_start();
+<?php require_once(__DIR__.'/../includes/pdf_runtime.php'); icon_pdf_session_start();
 if(in_array("46",$_SESSION['login_Permisions']))
 {
 	require_once('../tcpdf/tcpdf.php');

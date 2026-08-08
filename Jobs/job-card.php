@@ -1,4 +1,5 @@
 <?php
+require_once(__DIR__.'/../includes/pdf_runtime.php');
 require_once('../tcpdf/tcpdf.php');
 require_once('../includes/pdf_report_helper.php');
 

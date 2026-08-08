@@ -1,4 +1,4 @@
-<?php session_start();
+<?php require_once(__DIR__.'/../includes/pdf_runtime.php'); icon_pdf_session_start();
 
 if(in_array("45", isset($_SESSION['login_Permisions']) ? $_SESSION['login_Permisions'] : array()))
 {
