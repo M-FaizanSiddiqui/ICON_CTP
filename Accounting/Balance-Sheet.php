@@ -5,7 +5,7 @@ if($company_id_acc <= 0){
 	$company_id_acc = 1;
 }
 
-$as_of_date = isset($_GET['toDt']) && $_GET['toDt'] != '' ? $_GET['toDt'] : date('Y-m-d');
+$as_of_date = icon_date_value($_GET['toDt'] ?? '', date('Y-m-d'));
 $as_of_date_safe = mysqli_real_escape_string($conn,$as_of_date);
 
 $company_name = 'Selected Company';

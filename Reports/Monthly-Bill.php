@@ -36,8 +36,8 @@ if(in_array("45", isset($_SESSION['login_Permisions']) ? $_SESSION['login_Permis
 			}
 		}
 
-		$from_dt = $_POST['from_date'];
-		$to_dt = $_POST['to_date'];
+		$from_dt = icon_date_value($_POST['from_date'] ?? '', date('Y-m-d'));
+		$to_dt = icon_date_value($_POST['to_date'] ?? '', date('Y-m-d'));
 		
 		$pdf = new MYPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
 		 // set document information
@@ -45,7 +45,7 @@ if(in_array("45", isset($_SESSION['login_Permisions']) ? $_SESSION['login_Permis
 		$pdf->SetCreator(PDF_CREATOR);
 
 		if(isset($_POST['customer_id'])){
-			$customer_id = $_POST['customer_id'];
+			$customer_id = icon_post_int('customer_id');
 
 			$queryCust = "SELECT * FROM customers where cust_id = ".$customer_id;
 			$resultCust = mysqli_query($conn,$queryCust);

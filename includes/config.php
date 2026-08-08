@@ -43,4 +43,7 @@ if(!function_exists('icon_config')){
 		return $value;
 	}
 }
+
+require_once __DIR__.'/error_handler.php';
+icon_register_error_handling();
 ?>

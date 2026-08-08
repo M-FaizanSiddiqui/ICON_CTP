@@ -7,8 +7,8 @@ if($sales_receipt_module_id == "0" || in_array($sales_receipt_module_id,$_SESSIO
 {
 	$company_id_acc = isset($_GET['comp']) ? (int)$_GET['comp'] : 1;
 	if($company_id_acc <= 0){ $company_id_acc = 1; }
-	$from_date = isset($_GET['from']) && $_GET['from'] != '' ? $_GET['from'] : date('Y-m-01');
-	$to_date = isset($_GET['to']) && $_GET['to'] != '' ? $_GET['to'] : date('Y-m-d');
+	$from_date = icon_date_value($_GET['from'] ?? '', date('Y-m-01'));
+	$to_date = icon_date_value($_GET['to'] ?? '', date('Y-m-d'));
 	$from_date_safe = mysqli_real_escape_string($conn,$from_date);
 	$to_date_safe = mysqli_real_escape_string($conn,$to_date);
 

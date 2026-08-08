@@ -5,9 +5,9 @@ if(in_array("24",$_SESSION['login_Permisions']))
 
   $month = isset($_GET['month']) ? $_GET['month'] : date('Y-m');
 
-  $fromDt = isset($_GET['fromDt']) ? $_GET['fromDt'] : date('Y-m-d');
-  $toDt = isset($_GET['toDt']) ? $_GET['toDt'] : date('Y-m-d');
-  $item_id = isset($_GET['item_id']) ? $_GET['item_id'] : date('Y-m-d');
+  $fromDt = icon_date_value($_GET['fromDt'] ?? '', date('Y-m-d'));
+  $toDt = icon_date_value($_GET['toDt'] ?? '', date('Y-m-d'));
+  $item_id = icon_get_int('item_id');
 
   ?>
   <div class="container-fluid professional-ledger-page">

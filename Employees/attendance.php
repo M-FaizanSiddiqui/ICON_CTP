@@ -5,9 +5,9 @@ if(in_array(62,$_SESSION['login_Permisions']))
 
   $month = isset($_GET['month']) ? $_GET['month'] : date('Y-m');
 
-  $fromDt = isset($_GET['fromDt']) ? $_GET['fromDt'] : date('Y-m-01');
-  $toDt = isset($_GET['toDt']) ? $_GET['toDt'] : date('Y-m-t');
-  $employee_id = isset($_GET['employee_id']) ? $_GET['employee_id'] : "0";
+  $fromDt = icon_date_value($_GET['fromDt'] ?? '', date('Y-m-01'));
+  $toDt = icon_date_value($_GET['toDt'] ?? '', date('Y-m-t'));
+  $employee_id = icon_get_int('employee_id');
 
   ?>
   <style>

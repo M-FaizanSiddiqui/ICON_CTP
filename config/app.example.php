@@ -6,6 +6,7 @@
 return array(
 	'app_env' => 'production',
 	'app_debug' => false,
+	'log_path' => __DIR__.'/../storage/logs/app.log',
 	'db' => array(
 		'host' => 'localhost',
 		'user' => 'database_user',

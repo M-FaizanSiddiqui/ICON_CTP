@@ -8,8 +8,8 @@ if(in_array("44",$_SESSION['login_Permisions']))
 
 
 	if(isset($_POST['open_rpt'])){
-		$from_dt = $_POST['from_date'];
-		$to_dt = $_POST['to_date'];
+		$from_dt = icon_date_value($_POST['from_date'] ?? '', date('Y-m-d'));
+		$to_dt = icon_date_value($_POST['to_date'] ?? '', date('Y-m-d'));
 
 		class MYPDF extends TCPDF
 		{

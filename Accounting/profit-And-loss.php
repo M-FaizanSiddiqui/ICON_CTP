@@ -5,8 +5,8 @@ if($company_id_acc <= 0){
 	$company_id_acc = 1;
 }
 
-$from_date = isset($_GET['fromDt']) && $_GET['fromDt'] != '' ? $_GET['fromDt'] : date('Y-m-01');
-$to_date = isset($_GET['toDt']) && $_GET['toDt'] != '' ? $_GET['toDt'] : date('Y-m-d');
+$from_date = icon_date_value($_GET['fromDt'] ?? '', date('Y-m-01'));
+$to_date = icon_date_value($_GET['toDt'] ?? '', date('Y-m-d'));
 $from_date_safe = mysqli_real_escape_string($conn,$from_date);
 $to_date_safe = mysqli_real_escape_string($conn,$to_date);
 

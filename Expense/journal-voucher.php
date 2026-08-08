@@ -2,8 +2,8 @@
 
 if(in_array("66",$_SESSION['login_Permisions']))
 {
-	$from_date = isset($_GET['from']) && $_GET['from'] != '' ? $_GET['from'] : date('Y-m-01');
-	$to_date = isset($_GET['to']) && $_GET['to'] != '' ? $_GET['to'] : date('Y-m-d');
+	$from_date = icon_date_value($_GET['from'] ?? '', date('Y-m-01'));
+	$to_date = icon_date_value($_GET['to'] ?? '', date('Y-m-d'));
 	$from_date_safe = mysqli_real_escape_string($conn,$from_date);
 	$to_date_safe = mysqli_real_escape_string($conn,$to_date);
 

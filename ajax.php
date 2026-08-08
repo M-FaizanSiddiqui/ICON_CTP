@@ -1,8 +1,23 @@
 <?php
 ob_start();
-$action = $_GET['action'];
 include_once 'secure_session.php';
 include 'admin_class.php';
+$action = isset($_GET['action']) ? preg_replace('/[^a-zA-Z0-9_]/', '', (string)$_GET['action']) : '';
+$allowed_actions = array(
+	'login','login2','logout','logout2','save_user','delete_user','signup','update_account','save_settings',
+	'save_category','save_supplier','delete_supplier','save_customer','delete_customer','delete_category',
+	'save_product','delete_product','save_order','delete_order','save_inventory_item','delete_items',
+	'save_receive_inventory','delete_receive_inventory','save_job_order','delete_job_order','update_jobcard_status',
+	'edit_jobcard','save_customer_payment','delete_customer_payment','save_acc_type','delete_acc_type',
+	'save_new_acc','save_receive_inventory_cust','save_supplier_payment','save_transfer_inventory',
+	'save_waste_item','save_module','save_module_permissions','save_employee','sync_attendance',
+	'process_salary','save_journal_voucher'
+);
+if($action === '' || !in_array($action, $allowed_actions, true)){
+	http_response_code(400);
+	echo 'Invalid action.';
+	exit;
+}
 $crud = new Action();
 if($action == 'login'){
 	$login = $crud->login();

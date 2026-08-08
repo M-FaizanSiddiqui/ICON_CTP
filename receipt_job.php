@@ -1,10 +1,11 @@
 <?php 
 include 'db_connect.php';
-$order = $conn->query("SELECT a.*,b.cust_name as custName FROM job_order as a INNER JOIN customers as b on a.customer_id = b.cust_id where a.jd_id = {$_GET['id']}");
+$receipt_job_id = icon_get_int('id');
+$order = $conn->query("SELECT a.*,b.cust_name as custName FROM job_order as a INNER JOIN customers as b on a.customer_id = b.cust_id where a.jd_id = ".$receipt_job_id);
 foreach($order->fetch_array() as $k => $v){
 	$$k= $v;
 }
-$items = $conn->query("SELECT a.*,b.item_name FROM job_order_details as a inner join inventory_item as b on a.item_id = b.item_id where a.delete_status = 0 AND a.job_id = {$_GET['id']} ");
+$items = $conn->query("SELECT a.*,b.item_name FROM job_order_details as a inner join inventory_item as b on a.item_id = b.item_id where a.delete_status = 0 AND a.job_id = ".$receipt_job_id." ");
 
 function receipt_job_status_label($status){
 	$labels = [

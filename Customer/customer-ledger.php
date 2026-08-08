@@ -19,9 +19,9 @@ if(in_array(14,$_SESSION['login_Permisions']))
 
   $month = isset($_GET['month']) ? $_GET['month'] : date('Y-m');
 
-  $fromDt = isset($_GET['fromDt']) ? $_GET['fromDt'] : date('Y-m-d');
-  $toDt = isset($_GET['toDt']) ? $_GET['toDt'] : date('Y-m-d');
-  $customer_id = isset($_GET['customer_id']) ? $_GET['customer_id'] : date('Y-m-d');
+  $fromDt = icon_date_value($_GET['fromDt'] ?? '', date('Y-m-d'));
+  $toDt = icon_date_value($_GET['toDt'] ?? '', date('Y-m-d'));
+  $customer_id = icon_get_int('customer_id');
 
   ?>
   <div class="container-fluid professional-ledger-page">

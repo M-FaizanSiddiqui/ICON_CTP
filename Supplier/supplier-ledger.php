@@ -4,8 +4,8 @@ if(in_array("8",$_SESSION['login_Permisions']))
 {
 	function sl_safe($value){ return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8'); }
 	$supplier_id = isset($_GET['supplier_id']) ? (int)$_GET['supplier_id'] : 0;
-	$fromDt = isset($_GET['fromDt']) && $_GET['fromDt'] !== '' ? $_GET['fromDt'] : date('Y-m-01');
-	$toDt = isset($_GET['toDt']) && $_GET['toDt'] !== '' ? $_GET['toDt'] : date('Y-m-d');
+	$fromDt = icon_date_value($_GET['fromDt'] ?? '', date('Y-m-01'));
+	$toDt = icon_date_value($_GET['toDt'] ?? '', date('Y-m-d'));
 	$from_safe = mysqli_real_escape_string($conn,$fromDt);
 	$to_safe = mysqli_real_escape_string($conn,$toDt);
 

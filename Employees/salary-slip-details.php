@@ -2,7 +2,7 @@
 
 if(in_array("72",$_SESSION['login_Permisions']))
 {
-	$ref = $_GET['ref'];
+	$ref = icon_md5_ref($_GET['ref'] ?? '');
 	$fetchquery = "SELECT a.*,c.st_type_name FROM salary_slip as a INNER JOIN salary_type as c on a.sp_type_id = c.st_id WHERE md5(a.sp_id) = '".$ref."' ";
 	$runQuery = mysqli_query($conn,$fetchquery);
 	$i = 0;

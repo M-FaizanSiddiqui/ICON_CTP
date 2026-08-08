@@ -3,8 +3,8 @@
 if(in_array("20",$_SESSION['login_Permisions']))
 {
 	
-	$order_id = $_GET['id'];
-	if(is_numeric($order_id)){
+	$order_id = icon_get_int('id');
+	if($order_id > 0){
 		$id = 0;
 		$order = $conn->query("SELECT a.*,b.supp_name,c.name as userName FROM paper_requisition as a LEFT JOIN suppliers as b on a.supp_id = b.supp_id INNER JOIN users as c on a.user_id = c.id where del_status = 0 AND a.id =".$order_id);
 

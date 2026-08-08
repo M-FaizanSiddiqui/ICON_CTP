@@ -22,7 +22,7 @@ if(in_array("54",$_SESSION['login_Permisions']))
 									$modUserPer = "0,";
 									$ref="";
 									if(isset($_GET['ref'])){
-										$ref = $_GET['ref'];
+										$ref = icon_get_int('ref');
 										$queryPer = "SELECT * FROM module_permision WHERE user_id = ".$ref;
 										$resultPer = mysqli_query($conn,$queryPer);
 										while($dataPer = mysqli_fetch_array($resultPer)){

@@ -356,8 +356,16 @@ textarea.form-control{
 
 
       <?php
-      $page = isset($_GET['page']) ? $_GET['page'] :'home';
-      $quer = "SELECT * from modules_1 where m_url ='".$page."'";
+      $page = isset($_GET['page']) ? trim((string)$_GET['page']) :'home';
+      if($page === ''){
+        $page = 'home';
+      }
+      if(!preg_match('/^[A-Za-z0-9_\\-\\/]+$/', $page) || strpos($page, '..') !== false || strpos($page, '//') !== false){
+        include 'invalidLink.php';
+        exit;
+      }
+      $page_safe = mysqli_real_escape_string($conn, $page);
+      $quer = "SELECT * from modules_1 where m_url ='".$page_safe."'";
       $order = $conn->query($quer);
       $row_cnt = $order->num_rows;
       if($row_cnt>0){
@@ -366,7 +374,9 @@ textarea.form-control{
         $m_id = $row['m_id'];
         $m_parent_id = $row['m_parent_id'];
 
-        if(file_exists($page.'.php') == 1){
+        $resolved_page = realpath($page.'.php');
+        $root_path = realpath(__DIR__);
+        if($resolved_page && strpos($resolved_page, $root_path) === 0 && file_exists($page.'.php') == 1){
           $pageArray = explode("/",$page);
           $folder = $pageArray[0];
           include $page.'.php';

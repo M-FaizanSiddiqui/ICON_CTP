@@ -4,7 +4,10 @@ include '../db_connect.php';
 
 if(isset($_GET['ref'])){
 
-	$slip_d_id = $_GET['ref'];
+	$slip_d_id = icon_get_int('ref');
+	if($slip_d_id <= 0){
+		exit('Invalid slip reference.');
+	}
 
 	class MYPDF extends TCPDF 
 	{

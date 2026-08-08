@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__.'/includes/config.php';
+require_once __DIR__.'/includes/request_helpers.php';
 
 $servername = icon_config('db.host', 'localhost');
 $username = icon_config('db.user', 'root');

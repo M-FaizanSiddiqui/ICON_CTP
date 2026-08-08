@@ -2,8 +2,8 @@
 
 if(in_array("4",$_SESSION['login_Permisions']))
 {
-	$order_id = $_GET['id'];
-	if(is_numeric($order_id)){
+	$order_id = icon_get_int('id');
+	if($order_id > 0){
 		$order = $conn->query("SELECT a.*,b.supp_name FROM inventory_received as a INNER JOIN suppliers as b on a.supplier_id = b.supp_id where a.ir_id =".$order_id);
 
 		$row_cnt = $order->num_rows;

@@ -73,7 +73,7 @@ if(in_array("45",$_SESSION['login_Permisions']))
 
 
 	if(isset($_GET['ref'])){
-		$ref = $_GET['ref'];
+		$ref = icon_md5_ref($_GET['ref']);
 		
 		$fetchquery = "SELECT a.voucher_no,a.v_type_id,a.account_id as deb_acc,b.account_id as cred_acc,a.trans_dated,a.debit_amount,b.credit_amount,d.acc_name  as deb_acc_name, e.acc_name as cred_acc_name,a.narration FROM vouchers as a INNER JOIN vouchers as b on (a.voucher_no=b.voucher_no and b.credit_amount>0 AND a.v_type_id = b.v_type_id) LEFT JOIN accounts as d on a.account_id = d.account_no LEFT JOIN accounts as e on b.account_id = e.account_no WHERE a.cancel_flag = 0 AND a.v_type_id = 5 AND md5(a.voucher_no) = '".$ref."'";
 		$runQuery = mysqli_query($conn,$fetchquery);
