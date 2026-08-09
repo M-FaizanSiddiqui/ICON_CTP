@@ -13,6 +13,10 @@ INSERT INTO modules_1 (m_name, m_url, m_parent_id, fav_icon, ordering, heading, 
 SELECT 'Policies', 'SystemUser/policies', 39, 'fa fa-clipboard', 5, 0, 1
 WHERE NOT EXISTS (SELECT 1 FROM modules_1 WHERE m_url = 'SystemUser/policies');
 
+INSERT INTO modules_1 (m_name, m_url, m_parent_id, fav_icon, ordering, heading, show_in_menu)
+SELECT 'Accounting Audit', 'Accounting/accounting-audit', 34, 'fa fa-balance-scale', 20, 0, 1
+WHERE NOT EXISTS (SELECT 1 FROM modules_1 WHERE m_url = 'Accounting/accounting-audit');
+
 UPDATE modules_1
 SET m_name = 'Business Summary', m_url = 'Business/weekly-summary', m_parent_id = 0, fav_icon = 'fab fa-whatsapp', ordering = 12, heading = 0, show_in_menu = 1
 WHERE m_url = 'Reports/weekly-summary';
@@ -25,7 +29,7 @@ WHERE NOT EXISTS (SELECT 1 FROM modules_1 WHERE m_url = 'Business/weekly-summary
 INSERT INTO role_permissions (role_id, mod_id)
 SELECT r.role_id, m.m_id
 FROM roles r
-JOIN modules_1 m ON m.m_url IN ('SystemUser/data-health','SystemUser/error-logs','SystemUser/policies','Business/weekly-summary')
+JOIN modules_1 m ON m.m_url IN ('SystemUser/data-health','SystemUser/error-logs','SystemUser/policies','Business/weekly-summary','Accounting/accounting-audit')
 WHERE r.role_slug = 'admin'
 AND NOT EXISTS (
 	SELECT 1 FROM role_permissions rp WHERE rp.role_id = r.role_id AND rp.mod_id = m.m_id
@@ -41,11 +45,21 @@ AND NOT EXISTS (
 	SELECT 1 FROM role_permissions rp WHERE rp.role_id = r.role_id AND rp.mod_id = m.m_id
 );
 
+-- Accounts role can access accounting audit.
+INSERT INTO role_permissions (role_id, mod_id)
+SELECT r.role_id, m.m_id
+FROM roles r
+JOIN modules_1 m ON m.m_url = 'Accounting/accounting-audit'
+WHERE r.role_slug = 'accounts'
+AND NOT EXISTS (
+	SELECT 1 FROM role_permissions rp WHERE rp.role_id = r.role_id AND rp.mod_id = m.m_id
+);
+
 -- Legacy direct permission for Faizan user.
 INSERT INTO module_permision (mod_id, user_id)
 SELECT m.m_id, 1
 FROM modules_1 m
-WHERE m.m_url IN ('SystemUser/data-health','SystemUser/error-logs','SystemUser/policies','Business/weekly-summary')
+WHERE m.m_url IN ('SystemUser/data-health','SystemUser/error-logs','SystemUser/policies','Business/weekly-summary','Accounting/accounting-audit')
 AND NOT EXISTS (
 	SELECT 1 FROM module_permision mp WHERE mp.mod_id = m.m_id AND mp.user_id = 1
 );

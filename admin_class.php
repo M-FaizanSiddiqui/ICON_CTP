@@ -1455,6 +1455,36 @@ Class Action {
 		return ($delete && $act_log) ? 1 : "Error Occured!";
 	}
 
+	function repair_inventory_booked(){
+		$user_id = isset($_SESSION['login_id']) ? (int)$_SESSION['login_id'] : 0;
+		mysqli_query($this->db,"START TRANSACTION");
+		$before_qry = $this->db->query("SELECT COUNT(*) AS c FROM inventory_item i LEFT JOIN (SELECT d.item_id, SUM(d.quantity) AS booked_qty FROM job_order_details d INNER JOIN job_order j ON j.jd_id=d.job_id WHERE d.delete_status=0 AND j.del_status=0 AND j.order_status<>2 AND j.job_effect<>1 GROUP BY d.item_id) b ON b.item_id=i.item_id WHERE i.qty_booked<>COALESCE(b.booked_qty,0)");
+		$before = ($before_qry && $before_qry->num_rows > 0) ? (int)$before_qry->fetch_assoc()['c'] : 0;
+		$update = $this->db->query("UPDATE inventory_item i LEFT JOIN (SELECT d.item_id, SUM(d.quantity) AS booked_qty FROM job_order_details d INNER JOIN job_order j ON j.jd_id=d.job_id WHERE d.delete_status=0 AND j.del_status=0 AND j.order_status<>2 AND j.job_effect<>1 GROUP BY d.item_id) b ON b.item_id=i.item_id SET i.qty_booked=COALESCE(b.booked_qty,0)");
+		$act_log = activityLog("Inventory qty_booked recalculated from active job orders. Rows affected: ".$before,$user_id,$this->db);
+		if($update && $act_log){
+			mysqli_query($this->db,"COMMIT");
+			return "1|".$before;
+		}
+		mysqli_query($this->db,"ROLLBACK");
+		return "Error Occured!";
+	}
+
+	function repair_customer_inventory_booked(){
+		$user_id = isset($_SESSION['login_id']) ? (int)$_SESSION['login_id'] : 0;
+		mysqli_query($this->db,"START TRANSACTION");
+		$before_qry = $this->db->query("SELECT COUNT(*) AS c FROM customer_inventory ci LEFT JOIN (SELECT j.customer_id, d.item_id, SUM(d.quantity) AS booked_qty FROM job_order_details d INNER JOIN job_order j ON j.jd_id=d.job_id WHERE d.delete_status=0 AND j.del_status=0 AND j.order_status<>2 AND j.job_effect=1 GROUP BY j.customer_id,d.item_id) b ON b.customer_id=ci.cust_id AND b.item_id=ci.plate_id WHERE ci.del_status=0 AND ci.qty_booked<>COALESCE(b.booked_qty,0)");
+		$before = ($before_qry && $before_qry->num_rows > 0) ? (int)$before_qry->fetch_assoc()['c'] : 0;
+		$update = $this->db->query("UPDATE customer_inventory ci LEFT JOIN (SELECT j.customer_id, d.item_id, SUM(d.quantity) AS booked_qty FROM job_order_details d INNER JOIN job_order j ON j.jd_id=d.job_id WHERE d.delete_status=0 AND j.del_status=0 AND j.order_status<>2 AND j.job_effect=1 GROUP BY j.customer_id,d.item_id) b ON b.customer_id=ci.cust_id AND b.item_id=ci.plate_id SET ci.qty_booked=COALESCE(b.booked_qty,0) WHERE ci.del_status=0");
+		$act_log = activityLog("Customer inventory qty_booked recalculated from active job orders. Rows affected: ".$before,$user_id,$this->db);
+		if($update && $act_log){
+			mysqli_query($this->db,"COMMIT");
+			return "1|".$before;
+		}
+		mysqli_query($this->db,"ROLLBACK");
+		return "Error Occured!";
+	}
+
 
 
 

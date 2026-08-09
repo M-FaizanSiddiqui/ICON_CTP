@@ -11,7 +11,8 @@ $allowed_actions = array(
 	'edit_jobcard','save_customer_payment','delete_customer_payment','save_acc_type','delete_acc_type',
 	'save_new_acc','save_receive_inventory_cust','save_supplier_payment','save_transfer_inventory',
 	'save_waste_item','save_module','save_module_permissions','save_employee','sync_attendance',
-	'process_salary','save_journal_voucher','save_role_permissions','save_user_roles','save_policy','delete_policy'
+	'process_salary','save_journal_voucher','save_role_permissions','save_user_roles','save_policy','delete_policy',
+	'repair_inventory_booked','repair_customer_inventory_booked'
 );
 if($action === '' || !in_array($action, $allowed_actions, true)){
 	http_response_code(400);
@@ -258,6 +259,16 @@ if($action == "delete_policy"){
 	$delete = $crud->delete_policy();
 	if($delete)
 		echo $delete;
+}
+if($action == "repair_inventory_booked"){
+	$repair = $crud->repair_inventory_booked();
+	if($repair)
+		echo $repair;
+}
+if($action == "repair_customer_inventory_booked"){
+	$repair = $crud->repair_customer_inventory_booked();
+	if($repair)
+		echo $repair;
 }
 
 
