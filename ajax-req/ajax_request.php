@@ -2,7 +2,7 @@
 include('../db_connect.php');
 include('../functions.php');
 
-$req_no = $_POST['req_no'];
+$req_no = isset($_POST['req_no']) ? (int)$_POST['req_no'] : 0;
 $output_date = '<option value="">Please Select</option>';
 
 if($req_no == 1){
@@ -157,7 +157,11 @@ else if($req_no == 5){
 
 else if($req_no == 6){
 	$output_date="";
-	$salary_week = $_POST['salary_week'];
+	$salary_week = $_POST['salary_week'] ?? '';
+	if($salary_week == '' || strpos($salary_week,'**') === false){
+		echo '<tr class="my_tr"><td colspan="8" class="text-center text-muted">Please select a valid week.</td></tr>';
+		exit;
+	}
 	$week_start_dt = date('Y-m-d',strtotime(trim(explode("**",$salary_week)[0])));
 	$week_end_dt =  date('Y-m-d',strtotime(trim(explode("**",$salary_week)[1])));
 
@@ -262,7 +266,11 @@ else if($req_no == 6){
 
 
 else if($req_no == 7){
-	$salary_impression_month = $_POST['salary_impression_month'];
+	$salary_impression_month = $_POST['salary_impression_month'] ?? '';
+	if($salary_impression_month == ''){
+		echo '<tr class="my_tr"><td colspan="8" class="text-center text-muted">Please select a valid month.</td></tr>';
+		exit;
+	}
 	$output_date = "";
 	$queryAttDe = "SELECT a.*,b.salary FROM employee as a INNER JOIN emp_salary as b on a.emp_id = b.emp_id WHERE a.sal_type_id = 3 and a.emp_status = 0 ";
 	$counter=0;
@@ -291,7 +299,11 @@ else if($req_no == 7){
 
 
 else if($req_no == 8){
-	$salary_month = $_POST['salary_month'];
+	$salary_month = $_POST['salary_month'] ?? '';
+	if($salary_month == ''){
+		echo '<tr class="my_tr"><td colspan="12" class="text-center text-muted">Please select a valid month.</td></tr>';
+		exit;
+	}
 	$output_date = "";
 
 	$from_dt = date('Y-m-01',strtotime($salary_month));
@@ -299,6 +311,9 @@ else if($req_no == 8){
 
 	
 	$new_array = get_salary_employees($from_dt,$to_dt,1,$conn);
+	if(count($new_array) == 0){
+		$output_date = '<tr class="my_tr"><td colspan="12" class="text-center text-muted">No monthly salary employees found for this period.</td></tr>';
+	}
 
 	for($ii=0; $ii<count($new_array); $ii++){
 
@@ -422,7 +437,11 @@ else if ($req_no == 9){
 
 
 else if($req_no == 10){
-	$salary_month = $_POST['salary_hour_month'];
+	$salary_month = $_POST['salary_hour_month'] ?? '';
+	if($salary_month == ''){
+		echo '<tr class="my_tr"><td colspan="11" class="text-center text-muted">Please select a valid month.</td></tr>';
+		exit;
+	}
 	$output_date = "";
 
 	$from_dt = date('Y-m-01',strtotime($salary_month));
@@ -447,7 +466,9 @@ else if($req_no == 10){
 
 	$queryRec = "SELECT a.*,b.des_name, c.shift_name, c.shift_start, c.shift_end, c.total_hours, c.grace_time,d.salary FROM employee as a INNER JOIN designations as b on a.emp_designation_id = b.des_id INNER JOIN employee_shifts as c on a.emp_shift_id = c.shift_id INNER JOIN emp_salary as d on a.emp_id = d.emp_id  WHERE a.emp_status = 0 AND a.sal_type_id = 4 AND a.emp_id != 1 order by a.emp_id ASC ";
 	$resultRec = mysqli_query($conn,$queryRec);
+	$row_count = 0;
 	while($dataRec = mysqli_fetch_array($resultRec)){
+		$row_count++;
 
 		$emp_id = $dataRec['emp_id'];
 		$emp_name = $dataRec['emp_name'];
@@ -960,6 +981,9 @@ else if($req_no == 10){
 		$output_date .='<td><input style="width:80px" class="form-control grossAmt" name="MonthGrossAmt[]" value="'.$gross_salary.'"></td>';
 		$output_date .='</tr>';
 
+	}
+	if($row_count == 0){
+		$output_date = '<tr class="my_tr"><td colspan="11" class="text-center text-muted">No monthly hourly employees found. Please assign employees to Monthly Hourly salary type first.</td></tr>';
 	}
 
 }

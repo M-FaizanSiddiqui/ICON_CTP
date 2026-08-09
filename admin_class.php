@@ -1690,7 +1690,7 @@ Class Action {
 	public function insertSalarySlip($type_id,$monthYear,$weekSt,$weekEnd,$uId){
 		$querySalarySlip = "INSERT INTO salary_slip SET ";
 		$querySalarySlip .= " sp_type_id = ".$type_id;
-		if($type_id == 1 || $type_id == 3){
+		if($type_id == 1 || $type_id == 3 || $type_id == 4){
 			$querySalarySlip .= ", sp_month_year = '".$monthYear."'";
 		}else{
 			$querySalarySlip .= ", sp_week_st = '".$weekSt."'";
@@ -1702,7 +1702,7 @@ Class Action {
 		return $query1;
 	}
 	public function checkEntryExist($type_id,$monthYear,$weekSt,$weekEnd,$uId){
-		if($type_id == 1 || $type_id == 3){			
+		if($type_id == 1 || $type_id == 3 || $type_id == 4){			
 			$qy1 = "SELECT * from salary_slip WHERE sp_type_id = ".$type_id." AND sp_month_year = '".$monthYear."' ";
 			$res1 = mysqli_query($this->db,$qy1);
 			if(mysqli_num_rows($res1)>0){
@@ -1756,10 +1756,15 @@ Class Action {
 		mysqli_query($this->db,"START TRANSACTION");
 		$data = "";
 		$data_act = "";
+		$query1 = false;
+		$query2 = false;
 		
 		
 
 		$sal_type = mysqli_real_escape_string($this->db,$_POST['sal_type']);
+		if($sal_type == ""){
+			return "Please select salary type";
+		}
 
 		if($sal_type == 1){
 			$salary_month = mysqli_real_escape_string($this->db,$_POST['salary_month']);
@@ -1968,6 +1973,98 @@ Class Action {
 			else{
 				return "Already Processed fo this Month";
 			}
+		}
+
+		if($sal_type == 4){
+			$salary_hour_month = mysqli_real_escape_string($this->db,$_POST['salary_hour_month'] ?? '');
+			if($salary_hour_month == ""){
+				return "Please select salary month";
+			}
+			$salary_hour_month = date('Y-m-d',strtotime($salary_hour_month));
+
+			$exntryCheck = $this->checkEntryExist($sal_type,$salary_hour_month,'','',$_SESSION['login_id']);
+			if($exntryCheck != "-1"){
+				$query1 =  $this->insertSalarySlip($sal_type,$salary_hour_month,'','',$_SESSION['login_id']);
+				$table_id = $this->db->insert_id;
+
+				if(isset($_POST['emp_id_month']) && count($_POST['emp_id_month']) > 0){
+					for($i=0; $i<count($_POST['emp_id_month']); $i++){
+						$emp_id_month = mysqli_real_escape_string($this->db,$_POST['emp_id_month'][$i]);
+						$perMonthSalary = mysqli_real_escape_string($this->db,$_POST['perMonthSalary'][$i] ?? 0);
+						$presentDays = mysqli_real_escape_string($this->db,$_POST['presentDays'][$i] ?? 0);
+						$absentDays = mysqli_real_escape_string($this->db,$_POST['absentDays'][$i] ?? 0);
+						$lateEarly = mysqli_real_escape_string($this->db,$_POST['lateEarly'][$i] ?? 0);
+						$overtimeHours = mysqli_real_escape_string($this->db,$_POST['overtimeHours'][$i] ?? 0);
+						$nonWorkingDays = mysqli_real_escape_string($this->db,$_POST['nonWorkingDays'][$i] ?? 0);
+						$MonthExpectedSalary = mysqli_real_escape_string($this->db,$_POST['MonthExpectedSalary'][$i] ?? 0);
+						$MonthIcentiveAmt = mysqli_real_escape_string($this->db,$_POST['MonthIcentiveAmt'][$i] ?? 0);
+						$MonthGrossAmt = mysqli_real_escape_string($this->db,$_POST['MonthGrossAmt'][$i] ?? 0);
+
+						$NWDS = mysqli_real_escape_string($this->db,$_POST['NWDS'][$i] ?? get_policy($this->db,'NWDS'));
+						$LESS = mysqli_real_escape_string($this->db,$_POST['LESS'][$i] ?? get_policy($this->db,'LESS'));
+						$ODS = mysqli_real_escape_string($this->db,$_POST['ODS'][$i] ?? get_policy($this->db,'ODS'));
+						$OTHOURSAL = get_policy($this->db,'OTHOURSAL');
+						$NSPHS = get_policy($this->db,'NSPHS');
+						$present_days_amt = mysqli_real_escape_string($this->db,$_POST['present_days_amt'][$i] ?? 0);
+						$absent_day_amt = mysqli_real_escape_string($this->db,$_POST['absent_day_amt'][$i] ?? 0);
+						$late_early_amt = mysqli_real_escape_string($this->db,$_POST['late_early_amt'][$i] ?? 0);
+						$overtime_amt = mysqli_real_escape_string($this->db,$_POST['overtime_amt'][$i] ?? 0);
+						$non_working_day_amt = mysqli_real_escape_string($this->db,$_POST['non_working_day_amt'][$i] ?? 0);
+
+						$total_month_days = (int)date('t',strtotime($salary_hour_month));
+						$per_day_salary = $total_month_days > 0 ? ((float)$perMonthSalary / $total_month_days) : 0;
+						$per_hour_salary = $per_day_salary > 0 ? ($per_day_salary / 8) : 0;
+
+						$qu2 = "INSERT INTO salary_slip_info SET ";
+						$qu2 .= "slip_id = '".$table_id."' ";
+						$qu2 .= ",emp_id = '".$emp_id_month."'";
+						$qu2 .= ",sal_type_id = '".$sal_type."'";
+						$qu2 .= ",month_year = '".$salary_hour_month."'";
+						$qu2 .= ",emp_salary = '".$perMonthSalary."'";
+						$qu2 .= ",total_month_days = '".$total_month_days."'";
+						$qu2 .= ",per_day_salary = '".$per_day_salary."'";
+						$qu2 .= ",per_hour_salary = '".$per_hour_salary."'";
+						$qu2 .= ",present_days = '".$presentDays."'";
+						$qu2 .= ",absent_days = '".$absentDays."'";
+						$qu2 .= ",late_arrival_days = '".$lateEarly."'";
+						$qu2 .= ",early_departure_days = '0'";
+						$qu2 .= ",half_days = '0'";
+						$qu2 .= ",overtime_hours_working_day = '".$overtimeHours."'";
+						$qu2 .= ",overtime_hours_non_working_day = '".$nonWorkingDays."'";
+						$qu2 .= ",overtime_hours_gazated_holiday = '0'";
+						$qu2 .= ",late_early_salary_days_deduct = '0'";
+						$qu2 .= ",late_early_deduction = '".$late_early_amt."'";
+						$qu2 .= ",absent_days_deduction = '".$absent_day_amt."'";
+						$qu2 .= ",half_days_deduction_amt = '0'";
+						$qu2 .= ",overtime_amt_working_days = '".$overtime_amt."'";
+						$qu2 .= ",NWDA_amt = '".$non_working_day_amt."'";
+						$qu2 .= ",LESS = '".$LESS."'";
+						$qu2 .= ",ODS = '".$ODS."'";
+						$qu2 .= ",NWDS = '".$NWDS."'";
+						$qu2 .= ",OTHOURSAL = '".$OTHOURSAL."'";
+						$qu2 .= ",NSPHS = '".$NSPHS."'";
+						$qu2 .= ",AbsentDeduct = 'Yes'";
+						$qu2 .= ",LEHD = 'Yes'";
+						$qu2 .= ",OtherAllownces = 'Yes'";
+						$qu2 .= ",night_shift_hours = '0'";
+						$qu2 .= ",night_shift_amt = '0'";
+						$qu2 .= ",expected_salary = '".$MonthExpectedSalary."'";
+						$qu2 .= ",incentive_amt = '".$MonthIcentiveAmt."'";
+						$qu2 .= ",month_gross_amt = '".$MonthGrossAmt."'";
+
+						$query2 = mysqli_query($this->db, $qu2);
+						if(!$query2){ break; }
+					}
+				}else{
+					return "No employees loaded for selected month";
+				}
+			}else{
+				return "Already Processed for This Month";
+			}
+		}
+
+		if(!in_array((int)$sal_type, array(1,2,3,4), true)){
+			return "Invalid salary type";
 		}
 
 

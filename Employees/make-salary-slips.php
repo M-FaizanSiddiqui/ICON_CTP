@@ -23,7 +23,7 @@ if(in_array(71,$_SESSION['login_Permisions']))
 										<div class="form-group">
 											<label class="control-label"><b>Salary Type:</b></label>
 											<select class="form-control" name="sal_type" id="sal_type">
-												<option>Please Select</option>
+												<option value="">Please Select</option>
 												<?php 
 												$query1 = "SELECT * FROM salary_type";
 												$result1 = mysqli_query($conn,$query1);
@@ -46,7 +46,7 @@ if(in_array(71,$_SESSION['login_Permisions']))
 										<div class="form-group">
 											<label class="control-label"><b>Salary Month:</b></label>
 											<select class="form-control" name="salary_month" id="salary_month">
-												<option>Please Select</option>
+												<option value="">Please Select</option>
 												<?php
 
 											$curDate = strtotime(date('Y-m-01')); // First day of current month
@@ -93,21 +93,9 @@ if(in_array(71,$_SESSION['login_Permisions']))
 										<div class="form-group">
 											<label class="control-label"><b>Salary Week:</b></label>
 											<select class="form-control" name="salary_week" id="salary_week">
-												<option>Please Select</option>
+												<option value="">Please Select</option>
 												<?php
 
-												// $curDate = date('2025-12-20');
-												// for($i=1; $i<36; $i++){
-												// 	$pre_date = $curDate;
-												// 	$post_date =  date('Y-m-d', strtotime($pre_date. ' + 6 days'));
-												// 	?>
-
-												<!--// 	<option value="<?= date('d-M-Y',strtotime($pre_date)).' ** '. date('d-M-Y',strtotime($post_date)) ?>"><?= date('d-M-Y',strtotime($pre_date)).' - '.date('d-M-Y',strtotime($post_date)) ?></option>-->
-												 	<?php
-												// 	$curDate = date('Y-m-d', strtotime($post_date. ' + 1 days'));
-												// }
-												
-												
 												// Current date
                                                 $currentDate = date('Y-m-d');
                                                 
@@ -173,7 +161,7 @@ if(in_array(71,$_SESSION['login_Permisions']))
 										<div class="form-group">
 											<label class="control-label"><b>Salary Week:</b></label>
 											<select class="form-control" name="salary_impression_month" id="salary_impression_month">
-												<option>Please Select</option>
+												<option value="">Please Select</option>
 												<?php
 												$curDate = strtotime(date('Y-m-01')); // First day of current month
 
@@ -215,12 +203,12 @@ if(in_array(71,$_SESSION['login_Permisions']))
 										<div class="form-group">
 											<label class="control-label"><b>Salary Month:</b></label>
 											<select class="form-control" name="salary_hour_month" id="salary_hour_month">
-												<option>Please Select</option>
+												<option value="">Please Select</option>
 												<?php
 
-												$curDate = strtotime( date('2023-11-01'));
-												for($i=0; $i<24; $i++){
-													$thisDate = date("Y-m-01", strtotime("+".$i." month", $curDate));
+												$curDate = strtotime(date('Y-m-01'));
+												for($i = -3; $i <= 3; $i++){
+													$thisDate = date("Y-m-01", strtotime($i." month", $curDate));
 													?>
 													<option value="<?= date('M-Y',strtotime($thisDate)) ?>"><?= date('M-Y',strtotime($thisDate)) ?></option>
 													<?php
@@ -297,8 +285,14 @@ if(in_array(71,$_SESSION['login_Permisions']))
 			$('#manage-employee select').prop('disabled',false);
 		}
 		$('#manage-employee').on('reset',function(){
-			$('input:hidden').val('')
+			$('input:hidden').val('');
+			$('.my_tr').remove();
+			$('.weekDiv,.impressionkDiv,.monthDiv,.monthHourDiv').hide();
 		})
+
+		function resetSalaryRows(){
+			$('#tableMonthlyEmp .my_tr,#tableWeekEmp .my_tr,#tableImpressionEmp .my_tr,#tableMonthlyHourEmp .my_tr').remove();
+		}
 
 		$('.weekDiv').hide();
 		$('.impressionkDiv').hide();
@@ -312,6 +306,7 @@ if(in_array(71,$_SESSION['login_Permisions']))
 			$('.impressionkDiv').hide();
 			$('.monthDiv').hide();
 			$('.monthHourDiv').hide();
+			resetSalaryRows();
 
 			if(salTypee == "1"){
 				$('.monthDiv').show();
@@ -338,7 +333,7 @@ if(in_array(71,$_SESSION['login_Permisions']))
 				beforeSend : showSalaryTableLoader,
 				complete : hideSalaryTableLoader,
 				success : function(data){
-					$('.my_tr').remove();
+					$('#tableWeekEmp .my_tr').remove();
 					$('#tableWeekEmp').append(data);
 				}
 			});
@@ -355,7 +350,7 @@ if(in_array(71,$_SESSION['login_Permisions']))
 				beforeSend : showSalaryTableLoader,
 				complete : hideSalaryTableLoader,
 				success : function(data){
-					$('.my_tr').remove();
+					$('#tableImpressionEmp .my_tr').remove();
 					$('#tableImpressionEmp').append(data);
 				}
 			});
@@ -374,7 +369,7 @@ if(in_array(71,$_SESSION['login_Permisions']))
 				beforeSend : showSalaryTableLoader,
 				complete : hideSalaryTableLoader,
 				success : function(data){
-					$('.my_tr').remove();
+					$('#tableMonthlyEmp .my_tr').remove();
 					$('#tableMonthlyEmp').append(data);
 				}
 			});
@@ -393,7 +388,7 @@ if(in_array(71,$_SESSION['login_Permisions']))
 				beforeSend : showSalaryTableLoader,
 				complete : hideSalaryTableLoader,
 				success : function(data){
-					$('.my_tr').remove();
+					$('#tableMonthlyHourEmp .my_tr').remove();
 					$('#tableMonthlyHourEmp').append(data);
 				}
 			});
@@ -449,6 +444,31 @@ if(in_array(71,$_SESSION['login_Permisions']))
 
 		$('#manage-employee').submit(function(e){
 			e.preventDefault()
+			var salType = $('#sal_type').val();
+			if(!salType){
+				alert_toast('Please select salary type','warning');
+				return;
+			}
+			if(salType == '1' && !$('#salary_month').val()){
+				alert_toast('Please select salary month','warning');
+				return;
+			}
+			if(salType == '2' && !$('#salary_week').val()){
+				alert_toast('Please select salary week','warning');
+				return;
+			}
+			if(salType == '3' && !$('#salary_impression_month').val()){
+				alert_toast('Please select impression month','warning');
+				return;
+			}
+			if(salType == '4' && !$('#salary_hour_month').val()){
+				alert_toast('Please select salary month','warning');
+				return;
+			}
+			if($('.my_tr:visible input[name^="emp_id_"]').length === 0){
+				alert_toast('Please load employees before processing salary','warning');
+				return;
+			}
 			start_load()
 			$.ajax({
 				url:'ajax.php?action=process_salary',
@@ -466,13 +486,12 @@ if(in_array(71,$_SESSION['login_Permisions']))
 						},1500)
 
 					}else{
+						end_load();
 						alert_toast("Error Occured"+resp,'danger');
 					}
 				}
 			})
 		})
-
-		$('table').dataTable()
 	</script>
 
 
