@@ -28,10 +28,10 @@ Class Action {
 		$qry = $this->db->query("SELECT * FROM users where username = '".$username_safe."' LIMIT 1");
 		if($qry->num_rows > 0){
 			$user = $qry->fetch_array();
-			$stored_password = isset($user['password']) ? (string)$user['password'] : '';
+			$stored_password = isset($user['password']) ? trim((string)$user['password']) : '';
 			$password_ok = false;
 			if(strlen($stored_password) === 32 && ctype_xdigit($stored_password)){
-				$password_ok = hash_equals($stored_password,md5($password));
+				$password_ok = hash_equals(strtolower($stored_password),md5($password));
 			}else{
 				$password_ok = password_verify($password,$stored_password);
 			}
