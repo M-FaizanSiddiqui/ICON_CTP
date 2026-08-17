@@ -32,12 +32,6 @@ Class Action {
 			$password_ok = false;
 			if(strlen($stored_password) === 32 && ctype_xdigit($stored_password)){
 				$password_ok = hash_equals($stored_password,md5($password));
-				if($password_ok){
-					$new_hash = password_hash($password,PASSWORD_DEFAULT);
-					$new_hash_safe = mysqli_real_escape_string($this->db,$new_hash);
-					$this->db->query("UPDATE users SET password = '".$new_hash_safe."' WHERE id = ".(int)$user['id']);
-					$user['password'] = $new_hash;
-				}
 			}else{
 				$password_ok = password_verify($password,$stored_password);
 			}
